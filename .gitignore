@@ -1,0 +1,16 @@
+# Strata runtime generated files
+.strata-api-key
+strata-*.json
+run-*.sh
+run-*.bat
+*.log
+
+# Engine clone and models
+Strata/
+Strata-data/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
