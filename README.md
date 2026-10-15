@@ -1,4 +1,4 @@
-# Quavance AI — Local Strata Setup
+# Quavence AI — Local Strata Setup
 
 Run a 125-billion-parameter AI model on your own machine. Private by default:
 the model runs locally, nothing is sent to anyone, and the server is reachable
@@ -44,8 +44,8 @@ needs Docker. The Linux installer detects it and tells you so before starting.
 ### Linux
 
 ```bash
-git clone https://github.com/quavance/quavance-strata.git
-cd quavance-strata
+git clone https://github.com/quavence/quavence-strata.git
+cd quavence-strata
 chmod +x install-strata.sh
 ./install-strata.sh --check      # look before you leap: changes nothing
 ./install-strata.sh
@@ -276,6 +276,27 @@ export DEPIN_RUNTIME_MODEL="qwen3.8-flash-next-iq2_xs"
 ```
 
 Your node will now serve decentralized inference tasks for the Quavence Hub, receiving 85% of each prompt fee directly to your on-chain QVNC wallet address.
+
+---
+
+## Verified Hardware & Benchmark Reference (Tesla P100 Tier 3)
+
+Empirically verified on the Quavence DePIN network by community operator Stian (`StianNOR` / node `KingKong-AI`):
+
+- **Hardware**: AMD Ryzen 9 5950X (16C/32T) · 64 GB DDR4-3200 (2 × 32 GB) · NVIDIA Tesla P100 PCIe (16 GB HBM2) · Debian 13
+- **Model**: `Qwen3.8-Flash-Next GSQ-RCO IQ2_XS` (177B MoE)
+- **High-Throughput Configuration**:
+  - `--kv k8v4` (hybrid INT8 K / rotated Q4_0 V, saving 22.7% KV footprint)
+  - `--kv-resident 32768` (VRAM resident KV cells per layer on 16GB HBM2)
+  - `--prefill auto:32768`
+  - `--spec 4 --spec-min-p 0.5`
+- **Measured Metrics**:
+  - **Sustained Throughput**: **53.2 – 55.9 tokens/sec** across 2,300+ token complex coding generations.
+  - **VRAM Footprint**: 15,707 MiB / 16,384 MiB (zero wasted VRAM).
+  - **Power & Thermals**: GPU peaked at 203W at only **47°C**, CPU at **45°C** (zero thermal throttling).
+  - **System RAM Used**: 43 GB out of 64 GB.
+
+Read the full technical report: [docs/STRATA_P100_TIER3_BENCHMARK_REPORT.md](docs/STRATA_P100_TIER3_BENCHMARK_REPORT.md).
 
 ---
 

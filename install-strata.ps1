@@ -218,11 +218,42 @@ if ($cfg.port -ne $Port)       { $cfg.port = $Port;       $changed += "port -> $
 if (-not $cfg.api_key)         { Warn "no api_key in the config" }
 $i = [array]::IndexOf($cfg.args, "--max-context")
 if ($i -ge 0) { Info "context: $($cfg.args[$i + 1])" }
+
+$argsList = [System.Collections.Generic.List[string]]::new($cfg.args)
+function Set-StrataArg([string]$flag, [string]$val) {
+    $idx = $argsList.IndexOf($flag)
+    if ($idx -ge 0) {
+        if ($idx + 1 -lt $argsList.Count) {
+            $old = $argsList[$idx + 1]
+            if ($old -ne $val) {
+                $argsList[$idx + 1] = $val
+                $script:changed += "$flag $old -> $val"
+            }
+        } else {
+            $argsList.Add($val)
+            $script:changed += "$flag -> $val"
+        }
+    } else {
+        $argsList.Add($flag)
+        $argsList.Add($val)
+        $script:changed += "added $flag $val"
+    }
+}
+
+# Optimized Quavence DePIN Tier 3 flags (empirically verified: 50-55 tok/s, saves 22.7% KV memory):
+Set-StrataArg "--kv" "k8v4"
+Set-StrataArg "--kv-resident" "32768"
+Set-StrataArg "--prefill" "auto:32768"
+if ($argsList.IndexOf("--spec") -lt 0) { Set-StrataArg "--spec" "4" }
+if ($argsList.IndexOf("--spec-min-p") -lt 0) { Set-StrataArg "--spec-min-p" "0.5" }
+if ($argsList.IndexOf("--expert-cache") -lt 0) { Set-StrataArg "--expert-cache" "auto" }
+$cfg.args = $argsList.ToArray()
+
 if ($changed.Count -gt 0) {
     $cfg | ConvertTo-Json -Depth 10 | Set-Content $cfgFile.FullName -Encoding utf8
-    Info "corrected: $($changed -join ', ')"
+    Info "corrected / optimized: $($changed -join ', ')"
 } else {
-    Info "host and port are as requested"
+    Info "host, port, and high-throughput flags are as requested"
 }
 Ok "configuration verified"
 
